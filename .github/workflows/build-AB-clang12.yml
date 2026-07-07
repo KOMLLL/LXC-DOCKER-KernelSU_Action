@@ -89,7 +89,7 @@ jobs:
     - name: 修复Python2语法兼容问题
       run: |
         cd $GITHUB_WORKSPACE/kernel_workspace/android-kernel
-        sed -i 's/print "error, forbidden warning:/print("error, forbidden warning:/g' scripts/gcc-wrapper.py
+        sed -i 's/print "error, forbidden warning:\(.*\)/print("error, forbidden warning:\1)/' scripts/gcc-wrapper.py
         echo "=== gcc-wrapper.py 第34行已修复 ==="
         sed -n '34p' scripts/gcc-wrapper.py
 
