@@ -86,12 +86,24 @@ jobs:
         key: build-kernel-mido-kernel
         max-size: 2G
 
-    - name: 修复Python2语法兼容问题
+    - name: 修复Python2语法兼容问题(一键全文件转换)
       run: |
         cd $GITHUB_WORKSPACE/kernel_workspace/android-kernel
-        sed -i 's/print "error, forbidden warning:\(.*\)/print("error, forbidden warning:\1)/' scripts/gcc-wrapper.py
-        echo "=== gcc-wrapper.py 第34行已修复 ==="
-        sed -n '34p' scripts/gcc-wrapper.py
+        python3 -m lib2to3 -w scripts/gcc-wrapper.py 2>/dev/null && echo "lib2to3转换成功" || {
+          echo "lib2to3不可用，手动逐行修复"
+          sed -i 's/^\(\s*\)print "error, forbidden warning:\(.*\)/\1print("error, forbidden warning:\2)/' scripts/gcc-wrapper.py
+          sed -i 's/^\(\s*\)print \([a-zA-Z_][a-zA-Z0-9_]*\),$/\1print(\2, end=" ")/' scripts/gcc-wrapper.py
+          sed -i 's/^\(\s*\)print \(.*[^)]\)$/\1print(\2)/' scripts/gcc-wrapper.py
+        }
+        echo "=== gcc-wrapper.py 验证 ==="
+        python3 -c "compile(open('scripts/gcc-wrapper.py').read(), 'gcc-wrapper.py', 'exec'); print('语法检查通过')"
+
+    - name: 修复Kconfig文件Windows换行符
+      run: |
+        cd $GITHUB_WORKSPACE/kernel_workspace/android-kernel
+        find . -name "Kconfig" -exec sed -i 's/\r$//' {} \;
+        echo "=== synaptics Kconfig 验证 ==="
+        file drivers/oneplus/input/touchscreen/synaptics/Kconfig
 
     - name: 开始编译内核
       run: |
