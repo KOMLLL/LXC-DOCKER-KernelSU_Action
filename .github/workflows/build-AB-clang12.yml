@@ -93,18 +93,6 @@ jobs:
         echo "=== gcc-wrapper.py 第34行已修复 ==="
         sed -n '34p' scripts/gcc-wrapper.py
 
-    - name: 诊断Kconfig语法问题
-      run: |
-        cd $GITHUB_WORKSPACE/kernel_workspace/android-kernel
-        echo "=== init/Kconfig 第14-20行 ==="
-        sed -n '14,20p' init/Kconfig
-        echo "=== 检查 drivers/oneplus/input/touchscreen/synaptics/Kconfig 编码 ==="
-        file drivers/oneplus/input/touchscreen/synaptics/Kconfig 2>/dev/null || echo "文件不存在"
-        echo "=== 尝试修复Kconfig非法字符 ==="
-        if [ -f drivers/oneplus/input/touchscreen/synaptics/Kconfig ]; then
-          sed -i 's/\r//g' drivers/oneplus/input/touchscreen/synaptics/Kconfig
-        fi
-
     - name: 开始编译内核
       run: |
         cd $GITHUB_WORKSPACE/kernel_workspace/android-kernel
